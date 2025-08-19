@@ -1,5 +1,6 @@
 package com.example.kafka.consumers;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -8,6 +9,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
+import org.apache.kafka.common.errors.SerializationException;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -18,15 +20,16 @@ import java.util.Map;
 import java.util.Properties;
 
 
-@Profile("SingleMessageConsumer") // Добавляем профиль
+@Profile("SingleMessageConsumer")
 @Slf4j
 @Component
 public class SingleMessageConsumer {
 	private KafkaConsumer<String, String> consumer;
 
-	public void KafkaConsumer() {
+	@PostConstruct
+	public void initConsumer() {
 		Properties props = new Properties();
-		String bootstrapServers = "localhost:9092,localhost:9093,localhost:9094";
+		String bootstrapServers = "localhost:19092,localhost:19093,localhost:19094";
 
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -63,8 +66,10 @@ public class SingleMessageConsumer {
 	private void processMessage(ConsumerRecord<String, String> record) {
 		try {
 			// 1. Обработка сообщения
-			log.info("Обработка сообщения [key={}, value={}, offset={}, partition={}]",
-					record.key(), record.value(), record.offset(), record.partition());
+			System.out.printf("Обработка сообщения [key=%s, value=%s, offset=%s, partition=%s]%n",
+					record.key(), record.value(), record.offset(), record.partition()
+			);
+
 
 			// 2. Вручную коммитим оффсет после успешной обработки
 			Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
@@ -74,10 +79,13 @@ public class SingleMessageConsumer {
 			);
 
 			consumer.commitSync(offsets);
-			log.info("Коммит оффсетов для: {}-{}", record.topic(), record.partition());
+			System.out.printf("Коммит оффсетов для: %s-%s%n", record.topic(), record.partition());
 
+		} catch (SerializationException e) {
+			System.out.printf("Ошибка обработки сообщения [key=%s, value=%s, offset=%s, partition=%s%n] по причине: %s; %s",
+					record.key(), record.value(), record.offset(), record.partition(), e.getMessage(), e);
 		} catch (Exception e) {
-			log.error("Обработка сообщения зафейлилась по причине: {}", e.getMessage());
+			System.out.printf("Обработка сообщения зафейлилась по причине: %s%n", e.getMessage());
 		}
 	}
 }

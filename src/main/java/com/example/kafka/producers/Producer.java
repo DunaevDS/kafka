@@ -1,36 +1,49 @@
 package com.example.kafka.producers;
 
-import com.fasterxml.jackson.databind.ser.std.StringSerializer;
+
+import jakarta.annotation.PostConstruct;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-@Profile("producer1") // Добавляем профиль
+@Profile("Producer")
 @Component
 public class Producer {
 	private KafkaProducer<String, String> producer;
+	private static final int MAX_RETRIES = 10;
 
-	public void KafkaProducer() {
+	@PostConstruct
+	public void initProducer() {
 		Properties properties = new Properties();
 
-		String bootstrapServers = "localhost:9092,localhost:9093,localhost:9094";
+		String bootstrapServers = "localhost:19092,localhost:19093,localhost:19094";
 
 		properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 		properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class.getName());
 
+		// подтверждение от всех реплик
+		properties.put(ProducerConfig.ACKS_CONFIG, "all");
+		//указал что 10 повторных попыток
+		properties.put(ProducerConfig.RETRIES_CONFIG, MAX_RETRIES);
+		//задержка между повторными попытками 1 сек
+		properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
 		this.producer = new KafkaProducer<>(properties);
 
 		String exampleTopic = "some-topic";
-		String exampleKey = "key-1";
+		String exampleKey = "key-2";
 		String exampleMessage = "message-1";
 
 		sendMessage(exampleTopic, exampleKey, exampleMessage);
+		System.out.printf("Отправка сообщения [topic=%s, key=%s, message=%s]%n",
+				exampleTopic, exampleKey, exampleMessage
+		);
 		producer.close();
 	}
 

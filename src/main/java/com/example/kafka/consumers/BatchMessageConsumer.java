@@ -1,5 +1,6 @@
 package com.example.kafka.consumers;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -14,16 +15,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
-@Profile("BatchMessageConsumer") // Добавляем профиль
+@Profile("BatchMessageConsumer")
 @Component
 public class BatchMessageConsumer {
 	private KafkaConsumer<String, String> consumer;
 	//раз по задаче стоит минимум 10 сообщений, то пусть так
 	private static final int MIN_BATCH_SIZE = 10;
 
-	public void KafkaConsumer2() {
+	@PostConstruct
+	public void initKafkaConsumer2() {
 		Properties props = new Properties();
-		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9094");
+		String bootstrapServers = "localhost:19092,localhost:19093,localhost:19094";
+
+		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
 		props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
 				"org.apache.kafka.common.serialization.StringDeserializer");
 		props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
