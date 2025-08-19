@@ -8,3 +8,4 @@
 После отработки продюсера в консоли SingleMessageConsumer увидим пришедшее сообщение. 
 Отправим сообщение 10 раз -> увидим в консоли у BatchMessageConsumer всю пачку из 10.
    
+topic.txt находится в main\resources
