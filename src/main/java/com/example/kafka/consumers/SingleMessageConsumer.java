@@ -41,7 +41,7 @@ public class SingleMessageConsumer {
 		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
 		this.consumer = new KafkaConsumer<>(props);
-		this.consumer.subscribe(Collections.singletonList("some-topic"));
+		this.consumer.subscribe(Collections.singletonList("topic1"));
 
 		startConsuming();
 	}

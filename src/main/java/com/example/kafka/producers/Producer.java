@@ -36,7 +36,7 @@ public class Producer {
 		properties.put(ProducerConfig.RETRY_BACKOFF_MS_CONFIG, 1000);
 		this.producer = new KafkaProducer<>(properties);
 
-		String exampleTopic = "some-topic";
+		String exampleTopic = "topic1";
 		String exampleKey = "key-2";
 		String exampleMessage = "message-1";
 

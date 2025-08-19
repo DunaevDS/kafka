@@ -43,7 +43,7 @@ public class BatchMessageConsumer {
 		props.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG, "1024");
 
 		this.consumer = new KafkaConsumer<>(props);
-		this.consumer.subscribe(Collections.singletonList("some-topic"));
+		this.consumer.subscribe(Collections.singletonList("topic1"));
 
 		startConsuming();
 	}
